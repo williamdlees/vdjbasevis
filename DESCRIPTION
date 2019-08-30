@@ -1,0 +1,35 @@
+Package: vdjbaseVis
+Type: Package
+Title: multiple visualizations for genotypes
+Version: 0.1.0
+Authors@R: c(person("Ayelet", "Peres", role=c("aut","cre"), 
+                    email="peresay@biu.ac.il"),
+            person("Or", "Shemesh", role=c("aut"), 
+                    email="shemeshor@biu.ac.il"),
+            person("Aviv", "Omer", role=c("aut"), 
+                    email="omeraviv@biu.ac.il"),
+             person("Gur", "Yaari", role=c("aut","cph"), 
+                    email="gur.yaari@biu.ac.il"))
+Description: Multiple visualizations for genotype data.
+License: CC BY-SA 4.0
+LazyData: true
+BuildVignettes: true
+VignetteBuilder: knitr
+Encoding: UTF-8
+Depends: R (>= 3.2.5), ggplot2 (>= 2.0.0)
+Imports: dplyr (>= 0.5.0), reshape2,  plotly (>= 4.7.1),
+    gtools (>= 3.5.0), cowplot (>= 0.9.1), 
+    stats, dendextend (>= 1.9.0), data.table,
+    ggdendro (>= 0.1.20), gridExtra, alakazam (>= 0.2.10), tigger (>= 0.2.11), fastmatch,
+    methods, htmlwidgets, gtable, grDevices, rlang, RColorBrewer, tidyr, stringi, grid, mltools, splitstackshape
+Suggests: knitr,
+    rmarkdown
+RoxygenNote: 6.1.1
+NeedsCompilation: no
+Collate: 
+    'vdjbaseVis.R'
+    'internal_functions.R'
+    'genoHeatmap.R'
+    'genoHeatmap2.R'
+    'multipleGenotype.R'
+    'zzz.R'

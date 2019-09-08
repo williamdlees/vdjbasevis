@@ -26,3 +26,16 @@ A \code{data.frame} with the following columns.
   \item \code{'FREQ'}:     Gene usage of each individual, comma delimited.
 }
 }
+\examples{
+ gene_segment <- data.frame(GENE = c("V1-2",'V3-3','D2-8','D3-16','J4','J6'), FREQ = rep("0.2,0.1,0.2,0.4,0.5,0.6,0.7",6))
+ # plotting with base R boxplot
+ p <- geneUsage(gene_segment, plot_style = "base")
+ # to plot the graph to device we need to create a new page
+ grid::grid.newpage()
+ # plotting the grpah
+ p
+ # plotting with ggplot
+ p <- geneUsage(gene_segment, plot_style = "ggplot")
+ # plotting with plotly
+ p <- geneUsage(gene_segment, plot_style = "ggplot")
+}

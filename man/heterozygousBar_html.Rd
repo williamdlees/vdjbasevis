@@ -25,3 +25,7 @@ A \code{data.frame} with the following columns.
   \item \code{'HT'}:       Count of the Individuals heterozygous to the gene
 }
 }
+\examples{
+ gene_segment <- data.frame(GENE = c("V1-2",'V3-3','D2-8','D3-16','J4','J6'), HM = c(20,60,55,7,30,0) , HT = c(80,40,45,93,0,45))
+ heterozygousBar_html(gene_segment)
+}

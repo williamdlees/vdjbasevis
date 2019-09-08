@@ -1,7 +1,7 @@
 Package: vdjbaseVis
 Type: Package
 Title: multiple visualizations for genotypes
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Ayelet", "Peres", role=c("aut","cre"), 
                     email="peresay@biu.ac.il"),
             person("Or", "Shemesh", role=c("aut"), 

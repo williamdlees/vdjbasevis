@@ -27,7 +27,7 @@
 #' @import   dendextend
 #' @importFrom  cowplot      get_legend plot_grid ggdraw draw_label background_grid
 #' @importFrom  gridExtra    arrangeGrob
-#' @importFrom  plotly       ggplotly subplot layout
+#' @importFrom  plotly       ggplotly subplot
 #' @importFrom  dplyr        do n desc funs %>% distinct
 #'                           as_data_frame data_frame data_frame_
 #'                           bind_cols bind_rows combine rowwise slice
@@ -43,7 +43,7 @@
 #' @importFrom  ggdendro     dendro_data segment
 #' @importFrom  htmlwidgets  saveWidget
 #' @importFrom  gtable       gtable_filter
-#' @importFrom  grDevices    dev.off pdf
+#' @importFrom  grDevices    dev.off pdf colorRampPalette embedFonts recordPlot
 #' @importFrom  alakazam     getGene
 #' @importFrom  rlang        .data
 #' @importFrom  tigger       sortAlleles

@@ -4,7 +4,7 @@
 #' @param pkgname defunct
 #'
 #' @return invisible()
-.onLoad <- function(libname, pkgname) {
+.onAttach <- function(libname, pkgname) {
   packageStartupMessage(paste0("vdjbaseVis version: ",packageVersion(pkgname)))
   invisible()
 }

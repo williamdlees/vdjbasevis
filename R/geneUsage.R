@@ -19,7 +19,7 @@
 #'   \item \code{'FREQ'}:     Gene usage of each individual, comma delimited.
 #' }
 #'
-#' @example
+#' @examples
 #'  gene_segment <- data.frame(GENE = c("V1-2",'V3-3','D2-8','D3-16','J4','J6'), FREQ = rep("0.2,0.1,0.2,0.4,0.5,0.6,0.7",6))
 #'  # plotting with base R boxplot
 #'  p <- geneUsage(gene_segment, plot_style = "base")

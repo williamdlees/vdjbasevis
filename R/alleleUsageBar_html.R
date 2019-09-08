@@ -19,7 +19,7 @@
 #'   \item \code{'COUNT'}:    Number of unique alleles that appeared in the given population.
 #' }
 #'
-#' @example
+#' @examples
 #'  gene_segment <- data.frame(GENE = c("V1-2",'V3-3','D2-8','D3-16','J4','J6'), COUNT = c(2,9,2,2,1,2))
 #'  alleleUsageBar_html(gene_segment)
 #' @export

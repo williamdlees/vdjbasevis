@@ -1,3 +1,6 @@
 packrat/lib*/
 .Rproj.user
 checks/
+^genoHeatmap.R
+^allele_app_server.R
+server/

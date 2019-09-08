@@ -5,3 +5,4 @@
 ^genoHeatmap.R
 ^allele_app_server.R
 ^checks/
+^server/

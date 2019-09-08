@@ -2,3 +2,6 @@
 ^\.Rprofile$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^genoHeatmap.R
+^allele_app_server.R
+^checks/

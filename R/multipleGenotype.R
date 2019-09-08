@@ -23,16 +23,16 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       gen_table$GENOTYPED_ALLELES <- gsub("Deletion","Del",gen_table$GENOTYPED_ALLELES)
 
       # select columns
-      genotype_all <- gen_table  %>% select(SUBJECT,GENE,ALLELES,COUNTS,TOTAL,K_DIFF,GENOTYPED_ALLELES,Freq_by_Clone)
+      genotype_all <- gen_table  %>% dplyr::select(SUBJECT,GENE,ALLELES,COUNTS,TOTAL,K_DIFF,GENOTYPED_ALLELES,Freq_by_Clone)
 
       # change columns names Genotyped_alleles to Alleles
-      genotype_all <- genotype_all   %>% rename(temp=GENOTYPED_ALLELES)
-      genotype_all<- genotype_all   %>% rename(GENOTYPED_ALLELES=ALLELES)
-      genotype_all <- genotype_all   %>% rename(ALLELES=temp)
+      genotype_all <- genotype_all   %>% dplyr::rename(temp=GENOTYPED_ALLELES)
+      genotype_all<- genotype_all   %>% dplyr::rename(GENOTYPED_ALLELES=ALLELES)
+      genotype_all <- genotype_all   %>% dplyr::rename(ALLELES=temp)
       genotype<-genotype_all
 
       # # for filter subjects or genes!!!!!!!!!!
-      genotype <- subset(genotype, SUBJECT %in% unique(genotype$SUBJECT)[1:15])
+      #genotype <- subset(genotype, SUBJECT %in% unique(genotype$SUBJECT)[1:15])
       # genotype <- subset(genotype,  GENE%in% unique(genotype_all$GENE)[] )
       # # end: for filter subjects or genes!!!!!!!!!!!!!!!
 
@@ -78,11 +78,11 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       }
 
       # Omit rows containing specific ALLELES/K_DIFF/GENE column of NA
-      geno2  <-geno2   %>% drop_na(ALLELES)
-      geno2  <-geno2   %>% drop_na(K_DIFF)
-      geno2  <-geno2   %>% drop_na(GENE)
+      geno2  <-geno2   %>% tidyr::drop_na(ALLELES)
+      geno2  <-geno2   %>% tidyr::drop_na(K_DIFF)
+      geno2  <-geno2   %>% tidyr::drop_na(GENE)
       #geno2  <-geno2   %>% drop_na(Freq_by_Clone)
-      genotype <- genotype   %>% drop_na(GENE)
+      genotype <- genotype   %>% tidyr::drop_na(GENE)
 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~ save and group K values ~~~~~~~~~~~~~~~~~~~~~~~
       kval.df = subset(genotype,select=c(SUBJECT,GENE,GENOTYPED_ALLELES,K_DIFF,Freq_by_Clone)) # Kval per gene
@@ -102,8 +102,8 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       kval.df$K_GROUPED <- bin_data(kval.df$K, bins=c(0, 1,2,3,4,5,10,20,50,Inf), binType = "explicit")
       kval.df <- kval.df[!is.na(na_if(kval.df$GENOTYPED_ALLELES,"")),]
       #~~~~~~~~~~~~~~~~~~~~~~~~~ select columns ~~~~~~~~~~~~~~~~~~~~~~~
-      geno2 <- geno2   %>% select(SUBJECT,GENE,ALLELES,K_DIFF,GENOTYPED_ALLELES,Freq_by_Clone)
-      kval.df2 <- kval.df   %>% rename(ALLELES=K_GROUPED)
+      geno2 <- geno2   %>% dplyr::select(SUBJECT,GENE,ALLELES,K_DIFF,GENOTYPED_ALLELES,Freq_by_Clone)
+      kval.df2 <- kval.df   %>% dplyr::rename(ALLELES=K_GROUPED)
       unique_k <- unique(kval.df$K_GROUPED)
 
       # # define ratio between Kdiff to allele appearance, 3/4 [KK 0102 0102 0102]
@@ -120,16 +120,16 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
 
 
 
-      geno2 <- as.data.frame(geno2  %>% group_by(.data$SUBJECT, .data$GENE)  %>% mutate(n = dplyr::n()))
+      geno2 <- as.data.frame(geno2  %>% dplyr::group_by(.data$SUBJECT, .data$GENE)  %>% dplyr::mutate(n = dplyr::n()))
       #geno2$freq <- ifelse(geno2$n == 1, 0.75, ifelse(geno2$n == 2, 0.375, ifelse(geno2$n == 3, 0.25, 0.1875)))
-      geno2 <- geno2  %>% group_by(.data$GENE, .data$SUBJECT)  %>%
-        mutate(freq = ifelse(.data$n == 1, 0.75,
+      geno2 <- geno2  %>% dplyr::group_by(.data$GENE, .data$SUBJECT)  %>%
+        dplyr::mutate(freq = ifelse(.data$n == 1, 0.75,
                               ifelse(.data$n == 2, rep(0.375,2),
                                      ifelse(.data$n == 3, rep(0.25,3),
                                             rep(0.1875,4)))))
       kval.df2$freq <- 0.25
       geno2$ALLELE_TEXT <- geno2$ALLELES
-      dagger = "†"
+      dagger = "\u005E"
       if (length(grep("[0-9][0-9]_[0-9][0-9]", geno2$ALLELES)) != 0) {
         non_reliable_alleles_text <- nonReliableAllelesText_V2(non_reliable_alleles_text = geno2[grep("[0-9][0-9]_[0-9][0-9]", geno2$ALLELES), ],
                                                                map = T, size = 2)
@@ -143,13 +143,6 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       }
 
       if(any(grepl('^[0-9]+[_][A-Z][0-9]+[A-Z]',geno2$ALLELES))){
-      #check novel allele count
-      novel <- data.frame(Novel=grep('^[0-9]+[_][A-Z][0-9]+[A-Z]',geno2$ALLELES,value=T),
-                          Base = sapply(grep('[A-Z][0-9]+[A-Z]',geno2$ALLELES,value=T),
-                                        function(x) strsplit(x,'[_]')[[1]][1]))  %>%
-        distinct()  %>% group_by(.data$Base)  %>% mutate(n = dplyr::n())
-      # if any base is larger then 6 change to dagger and number
-      if(any(novel$n>6)){
         id <- grep('^[0-9]+[_][A-Z][0-9]+[A-Z]',names(allele_palette$transper))
         allele_palette$transper[id] <- 1
         new_allele <- paste0(dagger,1:length(id),'-',allele_palette$AlleleCol[id])
@@ -162,11 +155,7 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
         }
         allele_palette$AlleleCol[id] <- new_allele
         names(allele_palette$transper)[id] <- new_allele
-
-
-      }else{
-        novel_allele_text <- c()
-      }}else{novel_allele_text <- c()}
+      }else{novel_allele_text <- c()}
       # levels defenitions: allele before Kdiff, D1=levels of allele, D2= levels of Kdiff
       D2 <- levels(factor(kval.df$K_GROUPED))
       D1 <- levels(factor(geno2$ALLELES))
@@ -199,7 +188,7 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
         xlab("Gene") + ylab("") + scale_fill_hue(name = "Allele", h = c(0, 270), h.start = 10)+
         scale_fill_manual(values=c("white",alpha(names(allele_palette$AlleleCol), allele_palette$transper),
                                        #colors.set[length(colors.set)],  #needs to be the NR colors
-                                       "white","white",brewer.pal(length(D2), name="PuBu")),
+                                       "white","white",RColorBrewer::brewer.pal(length(D2), name="PuBu")),
                             drop=FALSE) +
           guides(fill=guide_legend(ncol =2)) +
           theme(legend.position="right",
@@ -207,23 +196,13 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
                 legend.title=element_blank()) + facet_grid(paste0(".~", facet_by)) # split by SAMPLES
       short_reads = F
       if(is.data.frame(non_reliable_alleles_text) | is.data.frame(novel_allele_text)){
+        tmp <- geno2_kval %>% dplyr::group_by(SUBJECT,GENE) %>% dplyr::arrange(desc(ALLELES)) %>% dplyr::mutate(order = 1:dplyr::n())
         unique_text <- bind_rows(non_reliable_alleles_text, novel_allele_text)
         unique_text$ALLELE_TEXT <- as.character(unique_text$ALLELES)
         unique_text$ALLELE_TEXT[unique_text$ALLELE_TEXT=="NRA"] <- unique_text$text_bottom[unique_text$ALLELE_TEXT=="NRA"]
-        unique_text$pos_f <- unique_text$pos
-        for(i in 1:nrow(unique_text)){
 
-          s = unique_text$SUBJECT[i]
-          a =  gsub('\\[[*][0-9]+\\] ',"",unique_text$ALLELE_TEXT[i])
-          g = unique_text$GENE[i]
-
-          pos <- geno2_kval  %>% filter(SUBJECT==s,GENE==g,ALLELE_TEXT==a)  %>% select(freq,n)  %>% unlist()
-
-          if(!grepl("[*]",unique_text$ALLELE_TEXT[i])) pos = pos[1]+0.5*pos[2]
-          else pos = pos[1]
-          unique_text$pos_f[i] <- max(unique_text$pos[i],pos)
-        }
-
+        unique_text <- unique_text %>% left_join(tmp[,c('SUBJECT','GENE','ALLELE_TEXT','order')], by = c('SUBJECT','GENE','ALLELES'='ALLELE_TEXT'))
+        unique_text$pos_f <- unique_text$freq * (unique_text$order-1) + unique_text$freq/2
 
         unique_text$text2 <- paste0("Individual: ",unique_text$SUBJECT,
                                     '<br />', "Gene: ", unique_text$GENE,
@@ -235,7 +214,7 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       if (is.data.frame(non_reliable_alleles_text)) {
 
         full_plot <- full_plot + geom_text(data = unique_text[unique_text$ALLELES=="NRA",],
-                           aes_string(label = "text", x = "GENE", y = "pos",text = "text2"), angle = 0,
+                           aes_string(label = "text", x = "GENE", y = "pos_f",text = "text2"), angle = 0,
                            size = unique_text$size[unique_text$ALLELES=="NRA"])
 
         bottom_annot <- unique(non_reliable_alleles_text$text_bottom)
@@ -247,7 +226,7 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       ## multiple novel alleles annot
       if (is.data.frame(novel_allele_text)) {
         full_plot <- full_plot + geom_text(data = unique_text[unique_text$ALLELES!="NRA",],
-                                           aes_string(label = "text", x = "GENE", y = "pos", text = "text2"), angle = 0,
+                                           aes_string(label = "text", x = "GENE", y = "pos_f", text = "text2"), angle = 0,
                                            size = unique_text$size[unique_text$ALLELES!="NRA"])
       }
 
@@ -299,15 +278,15 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
        }else{
          #~~~~~~~~~~~~~~~~~~~~~~~~~ Save as html ~~~~~~~~~~~~~~~~~~~~~~~
          #p.l.c <- ggplotly(full_plot)
-         p.l.c <- ggplotly(full_plot,tooltip = "text2")  %>% plotly::layout(hovermode='closest', hoverdistance = 10,
+         p.l.c <- ggplotly(full_plot + labs(x="") ,tooltip = "text2")  %>% plotly::layout(hoverdistance = 10, #hovermode='y',
                                                                    yaxis = list(title = paste0(c(rep("&nbsp;", 3), "Gene",rep("&nbsp;", 3),
                                                                                                  rep("\n&nbsp;", 1)), collapse = ""))) # %>% config(displayModeBar = F)
          p.l.c$height = length(unique(geno2_kval$GENE)) * 10
          p.l.c$width = ifelse(length(unique(geno2_kval$SUBJECT))>4, "150%", ifelse(length(unique(geno2_kval$SUBJECT))==1, 450, "100%"))
 
-         for(i in grep(dagger,p.l.c$x$data)){
-           p.l.c$x$data[[i]]$hoverinfo <- "skip"
-         }
+         # for(i in grep('\\^',p.l.c$x$data)){
+         #   p.l.c$x$data[[i]]$hoverinfo <- "skip"
+         # }
          p.l.c$x$layout$xaxis$ticktext <- sapply(p.l.c$x$layout$xaxis$ticktext, function(x){
            ifelse(x %in% gsub(chain,"",color_pes_orf), paste0("[",x,"]"),x)
          },USE.NAMES = F)

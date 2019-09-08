@@ -27,9 +27,13 @@ Suggests: knitr,
 RoxygenNote: 6.1.1
 NeedsCompilation: no
 Collate: 
+    'alleleAPP.R'
+    'alleleUsageBar_html.R'
+    'geneUsage.R'
+    'genoHeatmap.R'
+    'genoHeatmap_html.R'
+    'heterozygousBar_html.R'
     'vdjbaseVis.R'
     'internal_functions.R'
-    'genoHeatmap.R'
-    'genoHeatmap2.R'
     'multipleGenotype.R'
     'zzz.R'

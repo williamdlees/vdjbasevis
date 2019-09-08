@@ -7,7 +7,8 @@
 genoHeatmap(geno_table, chain = c("IGH", "IGK", "IGL"),
   gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1,
   mark_low_lk = TRUE, html = FALSE, n_line = 4, line_length = 60,
-  pseudo_genes = FALSE, ORF_genes = FALSE)
+  pseudo_genes = FALSE, ORF_genes = FALSE,
+  file = file.path(normalizePath(tempdir()), "genotype_heatmap.pdf"))
 }
 \arguments{
 \item{geno_table}{genoytpe summary table. See details.}

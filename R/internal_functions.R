@@ -203,13 +203,13 @@ nonReliableAllelesText_V2 <- function(non_reliable_alleles_text, size = 3, map =
                                                  ifelse(non_reliable_alleles_text$freq == 3, 0.33, 0.25)))
   non_reliable_alleles_text$size <- size
   if(!map){
-    non_reliable_alleles_text <- non_reliable_alleles_text %>% ungroup() %>% group_by(.data$GENE, .data$SUBJECT, .data$hapBy) %>%
-      mutate(pos = .data$pos + ifelse(dplyr::row_number()==2,dplyr::row_number()-1.5,dplyr::row_number()-1))
+    non_reliable_alleles_text <- non_reliable_alleles_text %>% ungroup() %>% group_by(GENE, SUBJECT, hapBy) %>%
+      dplyr::mutate(pos = pos + ifelse(dplyr::row_number()==2,dplyr::row_number()-1.5,dplyr::row_number()-1))
     }else{
-    non_reliable_alleles_text <- non_reliable_alleles_text %>% ungroup() %>% group_by(.data$GENE, .data$SUBJECT) %>%
-      mutate(pos = ifelse(.data$n == 1, 0.5,
-                          ifelse(.data$n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
-                                 ifelse(.data$n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
+    non_reliable_alleles_text <- non_reliable_alleles_text %>% ungroup() %>% group_by(GENE, SUBJECT) %>%
+      dplyr::mutate(pos = ifelse(n == 1, 0.5,
+                          ifelse(n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
+                                 ifelse(n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
                                         seq(0.125,1,by = 0.25)[1:max(dplyr::row_number())]))))
   }
   non_reliable_alleles_text$NEW_ALLELES <- non_reliable_alleles_text$ALLELES
@@ -234,10 +234,10 @@ novelAlleleAnnotation <- function(novel_allele, new_label, size = 3) {
                                ifelse(novel_allele$freq == 2, 0.5,
                                       ifelse(novel_allele$freq == 3, 0.33, 0.25)))
     novel_allele$size = size
-    novel_allele <- novel_allele %>% ungroup() %>% group_by(.data$GENE, .data$SUBJECT) %>%
-      mutate(pos = ifelse(.data$n == 1, 0.5,
-                          ifelse(.data$n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
-                                 ifelse(.data$n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
+    novel_allele <- novel_allele %>% dplyr::ungroup() %>% dplyr::group_by(GENE, SUBJECT) %>%
+      dplyr::mutate(pos = ifelse(n == 1, 0.5,
+                          ifelse(n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
+                                 ifelse(n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
                                         seq(0.125,1,by = 0.25)[1:max(dplyr::row_number())]))))
     return(novel_allele)
   } else {
@@ -295,10 +295,10 @@ novelAlleleAnnotation_geno <- function(novel_allele, new_label, size = 3) {
                                ifelse(novel_allele$freq == 2, 0.5,
                                       ifelse(novel_allele$freq == 3, 0.33, 0.25)))
     novel_allele$size = size
-    novel_allele <- novel_allele %>% ungroup() %>% group_by(.data$GENE, .data$SUBJECT) %>%
-      mutate(pos = ifelse(.data$n == 1, 0.5,
-                          ifelse(.data$n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
-                                 ifelse(.data$n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
+    novel_allele <- novel_allele %>% dplyr::ungroup() %>% dplyr::group_by(GENE, SUBJECT) %>%
+      dplyr::mutate(pos = ifelse(n == 1, 0.5,
+                          ifelse(n == 2, seq(0.25,1,by = 0.5)[1:max(dplyr::row_number())],
+                                 ifelse(n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
                                         seq(0.125,1,by = 0.25)[1:max(dplyr::row_number())]))))
     return(novel_allele)
   } else {

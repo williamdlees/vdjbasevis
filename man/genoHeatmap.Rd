@@ -27,10 +27,19 @@ if by 'position' only functional genes are used and are ordered by their chromos
 
 \item{html}{if TRUE, an interactive html visualization is produced. Defualt is FALSE.}
 
-\item{color_y}{named list of the colors for y axis labels.}
+\item{file}{file path for rendering the plot to pdf. If non is supplied than the plot is retured as object. Defualt is NULL.}
+
+\item{color_y}{named list of the colors for y axis labels. Defualt is NULL.}
 }
 \value{
-A heat-map visualization of the genotype inference for multiple samples.
+The following list is returned:
+\itemize{
+  \item \code{'p'}:        heat-map visualization of the genotype inference for multiple samples.
+  \item \code{'width'}:    Optimal width value for rendering plot.
+  \item \code{'height'}:   Optimal width value for rendering plot.
+}
+
+When a file is supplied the graph is also rendered directly to pdf.
 }
 \description{
 The \code{genoHeatmap} function generates a graphical output of the alleles per gene in multiple samples.

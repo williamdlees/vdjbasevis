@@ -12,11 +12,18 @@
 #' @param    lk_cutoff            the lK cutoff value to be considerd low for texture layer. Defualt is lK<1.
 #' @param    mark_low_lk          if TRUE, a texture is add for low lK values. Defualt is TRUE.
 #' @param    html                 if TRUE, an interactive html visualization is produced. Defualt is FALSE.
-#' @param    color_y              named list of the colors for y axis labels.
-#'
+#' @param    color_y              named list of the colors for y axis labels. Defualt is NULL.
+#' @param    file                 file path for rendering the plot to pdf. If non is supplied than the plot is retured as object. Defualt is NULL.
 #' @return
 #'
-#' A heat-map visualization of the genotype inference for multiple samples.
+#' The following list is returned:
+#' \itemize{
+#'   \item \code{'p'}:        heat-map visualization of the genotype inference for multiple samples.
+#'   \item \code{'width'}:    Optimal width value for rendering plot.
+#'   \item \code{'height'}:   Optimal width value for rendering plot.
+#' }
+#'
+#' When a file is supplied the graph is also rendered directly to pdf.
 #'
 #' @details
 #'
@@ -186,7 +193,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   size_text = nrow(m)/(height*width) # text size for heatmap annoations
   size_text_leg = ncol(m2)/(width*longest_allele)+1 # text size for legend annotations
 
-  #pdf(file,onefile = F, width = width, height = height, family = "serif")
+  if(!is.null(file)) pdf(file,onefile = F, width = width, height = height, family = "serif")
 
   # plot layout
   layout.matrix <- matrix(c(1, 2, 3), nrow = 3, ncol = 1)
@@ -206,7 +213,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   # color y tick labels if supplied
   colors <- "black"
   if(!is.null(color_y)) colors <- color_y[rownames(m)]
-  #axis(2,(0:(samples_n-1))/(samples_n-1),rownames(m),las=1,cex.axis=0.8, col.axis = colors) # left
+
   Map(axis, side=2, at=(0:(samples_n-1))/(samples_n-1), col.axis=colors, labels=rownames(m), lwd=0, las=1, cex.axis=0.8) #left
   axis(2,at=(0:(samples_n-1))/(samples_n-1),labels=FALSE)
 
@@ -268,7 +275,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   p1.base <- recordPlot()
   invisible(dev.off())
   return(list(p = p1.base, width = width, height = height))
-  #dev.off()
+  if(!is.null(file)) dev.off()
   # embed the fonts to file
-  #embedFonts(file)
+  if(!is.null(file)) embedFonts(file)
 }

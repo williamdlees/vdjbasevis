@@ -23,10 +23,7 @@
 #'  gene_segment <- data.frame(GENE = c("V1-2",'V3-3','D2-8','D3-16','J4','J6'), FREQ = rep("0.2,0.1,0.2,0.4,0.5,0.6,0.7",6))
 #'  # plotting with base R boxplot
 #'  p <- geneUsage(gene_segment, plot_style = "base")
-#'  # to plot the graph to device we need to create a new page
-#'  grid::grid.newpage()
-#'  # plotting the grpah
-#'  p
+#'  cowplot::ggdraw(p)
 #'  # plotting with ggplot
 #'  p <- geneUsage(gene_segment, plot_style = "ggplot")
 #'  # plotting with plotly
@@ -78,16 +75,16 @@ geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style =
   fam_col <- setNames(c('deepskyblue','darkorange','forestgreen','red','mediumslateblue','saddlebrown','pink'),"1":"7")
   # split the frequency to rows
   gene_segment <- splitstackshape::cSplit(gene_segment, "FREQ", sep = ",", direction = "long", fixed = T, type.convert = F)
-  gene_segment[,FREQ := as.numeric(FREQ)]
+  gene_segment[,"FREQ" := as.numeric(gene_segment$FREQ)]
   # chain in gene name
   chain_gene <- grepl(paste0('^',chain),gene_segment$GENE)
   # get the gene familiy
   nth_fam <- ifelse(chain_gene, 5, 2)
-  gene_segment[,FAM:=substring(GENE, nth_fam, nth_fam)]
-  gene_segment[,FAM_COL:=fam_col[FAM]]
+  gene_segment[,"FAM":=substring(gene_segment$GENE, nth_fam, nth_fam)]
+  gene_segment[,"FAM_COL":=fam_col[gene_segment$FAM]]
   # get the different segments
   nth_seg <- ifelse(chain_gene, 4, 1)
-  gene_segment[,SEGMENT:=substring(GENE, nth_seg, nth_seg)]
+  gene_segment[,"SEGMENT":=substring(gene_segment$GENE, nth_seg, nth_seg)]
   segment_order <- genePlotOrder[genePlotOrder %in% unique(gene_segment$SEGMENT)]
   n_plots <- length(unique(gene_segment$SEGMENT))
   layout_p <- if(n_plots == 3) c(1,3,2,3) else if(n_plots == 2) c(1,2) else 1

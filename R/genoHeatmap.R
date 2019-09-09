@@ -12,6 +12,7 @@
 #' @param    lk_cutoff            the lK cutoff value to be considerd low for texture layer. Defualt is lK<1.
 #' @param    mark_low_lk          if TRUE, a texture is add for low lK values. Defualt is TRUE.
 #' @param    html                 if TRUE, an interactive html visualization is produced. Defualt is FALSE.
+#' @param    color_y              named list of the colors for y axis labels.
 #'
 #' @return
 #'
@@ -23,7 +24,7 @@
 #'
 #'
 #' @export
-genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1, mark_low_lk = TRUE, html = FALSE, n_line = 4, line_length=60, pseudo_genes = FALSE, ORF_genes = FALSE, file = file.path(normalizePath(tempdir()),"genotype_heatmap.pdf")) {
+genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1, mark_low_lk = TRUE, html = FALSE, n_line = 4, line_length=60, pseudo_genes = FALSE, ORF_genes = FALSE, file = file.path(normalizePath(tempdir()),"genotype_heatmap.pdf"), color_y = NULL) {
   if (missing(chain)) {
     chain = "IGH"
   }
@@ -32,14 +33,14 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
 
 
   # select columns
-  geno_db <- geno_table %>% select(.data$SUBJECT,.data$GENE,.data$GENOTYPED_ALLELES,.data$K_DIFF,.data$Freq_by_Clone)
+  geno_db <- geno_table[,c("SUBJECT", "GENE", "GENOTYPED_ALLELES", "K_DIFF", "Freq_by_Clone")]
   # rename the columns
   names(geno_db)[3:4] <- c("ALLELES", "K")
   # correct deletion annotations
   geno_db$ALLELES <- gsub("Deletion","Del",geno_db$ALLELES)
   # set data.table and correct missing Unk annotations and K
-  geno_db <- setDT(geno_db)[CJ(SUBJECT = SUBJECT, GENE = GENE, unique=TRUE), on=.(SUBJECT, GENE)]
-  geno_db[is.na(ALLELES) , c("ALLELES","K") := list("Unk", NA_integer_)]
+  geno_db <- setDT(geno_db)[CJ("SUBJECT" = geno_db$SUBJECT, "GENE" = geno_db$GENE, unique=TRUE), on=c("SUBJECT", "GENE")]
+  geno_db[is.na(geno_db$ALLELES) , c("ALLELES","K") := list("Unk", NA_integer_)]
   # set K value for deleted genes
   geno_db$K[grep("Del",geno_db$ALLELES)] <- NA_integer_
   # expand row, one allele per row
@@ -66,7 +67,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   geno_db$GENE_LOC <- gene_loc[as.character(geno_db$GENE)]
 
   ######sort the heatmap for plotting
-  geno_db_m <- geno_db[, n:=  .N, by = list(SUBJECT,GENE)][] # count number of alleles for group
+  geno_db_m <- geno_db[, n:=  .N, by = c("SUBJECT", "GENE")][] # count number of alleles for group
   geno_db_m$ALLELES_G <- geno_db_m$ALLELES # for grouping
   geno_db_m$text <- ''
   geno_db_m$text_bottom <- geno_db_m$ALLELES
@@ -128,20 +129,20 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
 
   # order the data by gene loc
   setorderv(geno_db_m, c("SUBJECT","GENE_LOC"))
-  setkey(geno_db_m, SUBJECT)
+  setkey(geno_db_m, "SUBJECT")
 
   # sort data for matrix
-  geno_db_m[,line:=12/n]
+  geno_db_m[,"line":=12/geno_db_m$n]
   allele_code <- 1:length(allele_palette$AlleleCol)
   names(allele_code) <- gsub("\\^[0-9]+[-]","",allele_palette$AlleleCol)
   # sort the alleles in gene box
-  geno_db_m[,A_CODE:=allele_code[ALLELES]+1]
-  geno_db_m[grep("[0-9]_[0-9]",geno_db_m$ALLELES,perl = T),A_CODE:=allele_code["NRA"]]
+  geno_db_m[,"A_CODE":=allele_code[geno_db_m$ALLELES]+1]
+  geno_db_m[grep("[0-9]_[0-9]",geno_db_m$ALLELES,perl = T), "A_CODE":=allele_code["NRA"]]
   setorderv(geno_db_m, c("SUBJECT","GENE_LOC","A_CODE"))
 
   # duplicate the data by 12 box to gene
-  geno_db_m[,id := 1:.N, by = .(SUBJECT, GENE)]
-  geno_db_f = geno_db_m[,.(n_line = 1:line), by = .(SUBJECT, GENE, GENE_LOC, ALLELES_G, A_CODE,text_bottom), nomatch = 0]
+  geno_db_m[,"id" := 1:.N, by = c("SUBJECT", "GENE")]
+  geno_db_f = geno_db_m[,c("n_line" = 1:get("line")), by = c("SUBJECT", "GENE", "GENE_LOC", "ALLELES_G", "A_CODE", "text_bottom"), nomatch = 0]
 
   # transform allele codes to matrix, 12 box for each gene. each row is an individual
   m <- matrix(geno_db_f[[5]],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
@@ -185,7 +186,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   size_text = nrow(m)/(height*width) # text size for heatmap annoations
   size_text_leg = ncol(m2)/(width*longest_allele)+1 # text size for legend annotations
 
-  pdf(file,onefile = F, width = width, height = height, family = "serif")
+  #pdf(file,onefile = F, width = width, height = height, family = "serif")
 
   # plot layout
   layout.matrix <- matrix(c(1, 2, 3), nrow = 3, ncol = 1)
@@ -201,7 +202,13 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   # add axis annotations
   axis(3,(0:(genes_n-1))/genes_n+6/(12*genes_n),names(gene_loc),las=3) # top
   axis(1,(0:(genes_n-1))/genes_n+6/(12*genes_n),names(gene_loc),las=3) # bottom
-  axis(2,(0:(samples_n-1))/(samples_n-1),rownames(m),las=1,cex.axis=0.8) # left
+
+  # color y tick labels if supplied
+  colors <- "black"
+  if(!is.null(color_y)) colors <- color_y[rownames(m)]
+  #axis(2,(0:(samples_n-1))/(samples_n-1),rownames(m),las=1,cex.axis=0.8, col.axis = colors) # left
+  Map(axis, side=2, at=(0:(samples_n-1))/(samples_n-1), col.axis=colors, labels=rownames(m), lwd=0, las=1, cex.axis=0.8) #left
+  axis(2,at=(0:(samples_n-1))/(samples_n-1),labels=FALSE)
 
   # draw lines for low lk values
   sub_geno = geno_db_m[geno_db_m$K<lk_cutoff,]
@@ -258,7 +265,10 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
     par(mar=c(1,6,1,6))
     gplots::textplot(annot, halign = "center", cex = size)
   }
-  dev.off()
+  p1.base <- recordPlot()
+  invisible(dev.off())
+  return(list(p = p1.base, width = width, height = height))
+  #dev.off()
   # embed the fonts to file
-  embedFonts(file)
+  #embedFonts(file)
 }

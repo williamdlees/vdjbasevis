@@ -8,7 +8,8 @@ genoHeatmap(geno_table, chain = c("IGH", "IGK", "IGL"),
   gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1,
   mark_low_lk = TRUE, html = FALSE, n_line = 4, line_length = 60,
   pseudo_genes = FALSE, ORF_genes = FALSE,
-  file = file.path(normalizePath(tempdir()), "genotype_heatmap.pdf"))
+  file = file.path(normalizePath(tempdir()), "genotype_heatmap.pdf"),
+  color_y = NULL)
 }
 \arguments{
 \item{geno_table}{genoytpe summary table. See details.}
@@ -25,6 +26,8 @@ if by 'position' only functional genes are used and are ordered by their chromos
 \item{mark_low_lk}{if TRUE, a texture is add for low lK values. Defualt is TRUE.}
 
 \item{html}{if TRUE, an interactive html visualization is produced. Defualt is FALSE.}
+
+\item{color_y}{named list of the colors for y axis labels.}
 }
 \value{
 A heat-map visualization of the genotype inference for multiple samples.

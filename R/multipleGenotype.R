@@ -23,12 +23,12 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
       gen_table$GENOTYPED_ALLELES <- gsub("Deletion","Del",gen_table$GENOTYPED_ALLELES)
 
       # select columns
-      genotype_all <- gen_table  %>% dplyr::select(SUBJECT,GENE,ALLELES,COUNTS,TOTAL,K_DIFF,GENOTYPED_ALLELES,Freq_by_Clone)
+      genotype_all <- gen_table[,c("SUBJECT","GENE","ALLELES","COUNTS","TOTAL","K_DIFF","GENOTYPED_ALLELES","Freq_by_Clone")]
 
       # change columns names Genotyped_alleles to Alleles
-      genotype_all <- genotype_all   %>% dplyr::rename(temp=GENOTYPED_ALLELES)
-      genotype_all<- genotype_all   %>% dplyr::rename(GENOTYPED_ALLELES=ALLELES)
-      genotype_all <- genotype_all   %>% dplyr::rename(ALLELES=temp)
+      genotype_all <- genotype_all  %>% dplyr::rename(temp=GENOTYPED_ALLELES)
+      genotype_all<- genotype_all %>% dplyr::rename(GENOTYPED_ALLELES=ALLELES)
+      genotype_all <- genotype_all %>% dplyr::rename(ALLELES=temp)
       genotype<-genotype_all
 
       # # for filter subjects or genes!!!!!!!!!!

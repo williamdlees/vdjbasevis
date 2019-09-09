@@ -367,3 +367,121 @@ next_divisor <- function(x,y){
     x <- x+1
   }
 }
+
+########################################################################################################
+#' Sort multiple genotypes
+#'
+#' The \code{sortGenotype} function sort multiple genotype tables.
+#'
+#'
+#' @param    geno_table           genoytpe summary table. See details.
+#' @param    chain                the IG chain: IGH,IGK,IGL. Default is IGH.
+#' @param    gene_sort            if by 'name' the genes in the output are ordered lexicographically,
+#' if by 'position' only functional genes are used and are ordered by their chromosomal location. Default is 'position'.
+#' @param    removeIGH            if TRUE, 'IGH'\'IGK'\'IGL' prefix is removed from gene names.
+#' @param    lk_cutoff            the lK cutoff value to be considerd low for texture layer. Defualt is lK<1.
+#'
+#' @return
+#'
+#' A \code{data.frame} of the genotypes.
+#'
+#' @details
+#'
+#' A \code{data.frame} created by \code{inferGenotypeBaysian}.
+#'
+#'
+#' @export
+sortGenotype <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1){
+  if (missing(chain)) {
+    chain = "IGH"
+  }
+  chain <- match.arg(chain)
+  lk_cutoff = as.numeric(lk_cutoff)
+  # select columns
+  geno_db <- geno_table[,c("SUBJECT", "GENE", "GENOTYPED_ALLELES", "K_DIFF", "Freq_by_Clone")]
+  # rename the columns
+  names(geno_db)[3:4] <- c("ALLELES", "K")
+  # correct deletion annotations
+  geno_db$ALLELES <- gsub("Deletion","Del",geno_db$ALLELES)
+  # set data.table and correct missing Unk annotations and K
+  geno_db <- setDT(geno_db)[CJ("SUBJECT" = geno_db$SUBJECT, "GENE" = geno_db$GENE, unique=TRUE), on=c("SUBJECT", "GENE")]
+  geno_db[is.na(geno_db$ALLELES) , c("ALLELES","K") := list("Unk", NA_integer_)]
+  # set K value for deleted genes
+  geno_db$K[grep("Del",geno_db$ALLELES)] <- NA_integer_
+  # expand row, one allele per row
+  geno_db <- splitstackshape::cSplit(geno_db, "ALLELES", sep = ",", direction = "long", fixed = T, type.convert = F)
+
+  # add pseudo genes and orf to color base
+  color_pes_orf <- c()
+  if(pseudo_genes){
+    color_pes_orf <- c(grep("V",PSEUDO[[chain]],value = T),color_pes_orf)
+  }
+  if(ORF_genes){
+    color_pes_orf <- c(unique(grep("OR|NL", geno_db$GENE,value = T)),color_pes_orf)
+  }
+
+  # sort the data, remove pseudo and orf if needed
+  geno_db <- sortDFByGene(DATA = geno_db, chain = chain, method = gene_sort, removeIGH = removeIGH, geno = T,
+                          peseudo_remove = pseudo_genes, ORF_remove = ORF_genes)
+
+  geno_db$GENE <- factor(geno_db$GENE, levels = gsub("IG[H|K|L]", "", GENE.loc[[chain]]))
+
+  # rename genes to numbers
+  gene_loc <- 1:length(unique(geno_db$GENE)[order(match(unique(geno_db$GENE), levels(geno_db$GENE)))])
+  names(gene_loc) <- unique(geno_db$GENE)[order(match(unique(geno_db$GENE), levels(geno_db$GENE)))]
+  geno_db$GENE_LOC <- gene_loc[as.character(geno_db$GENE)]
+
+  ######sort the heatmap for plotting
+  geno_db_m <- geno_db[, n:=  .N, by = c("SUBJECT", "GENE")][] # count number of alleles for group
+  geno_db_m$ALLELES_G <- geno_db_m$ALLELES # for grouping
+  geno_db_m$text <- ''
+  geno_db_m$text_bottom <- geno_db_m$ALLELES
+  # change ambiguous alleles call
+  id_nra <- grepl("[0-9][0-9]_[0-9][0-9]", geno_db_m$ALLELES)
+  nra <- F
+  if (any(id_nra)) {
+    # number ambiguous alleles
+    num_text <- paste0('[*',1:length(unique(geno_db_m$ALLELES[id_nra])),']')
+    names(num_text) <- unique(geno_db_m$ALLELES[id_nra])
+    # text for plot
+    geno_db_m$text[id_nra] <- num_text[geno_db_m$ALLELES[id_nra]]
+    # text for legend
+    geno_db_m$text_bottom[id_nra] <- paste(num_text[geno_db_m$ALLELES[id_nra]],geno_db_m$ALLELES[id_nra])
+    # change allele to NRA - non reliable allele
+    geno_db_m$ALLELES[id_nra] <- "NRA"
+    # indicates that nra exists
+    nra <- T
+  }
+  # create allele palette
+  allele_palette <- allelePalette(geno_db_m$ALLELES)
+
+  # sort novel allele calls for plot
+  val_novel <- grep('^[0-9]+[_][A-Z][0-9]+[A-Z]',geno_db_m$ALLELES, value = T)
+  novel <- F
+  novel_allele_text <- c()
+  novel_symbol <- "\u005E"
+  if(length(val_novel)!=0){
+    # sort the palettle colors for novel alleles
+    id <- grep('^[0-9]+[_][A-Z][0-9]+[A-Z]',names(allele_palette$transper))
+    allele_palette$transper[id] <- 1
+    # cerate code index for novel allele
+    code_allele <- paste0(novel_symbol,1:length(id))
+    names(code_allele) <-allele_palette$AlleleCol[id]
+    new_allele <- paste0(novel_symbol,1:length(id),'-',allele_palette$AlleleCol[id])
+    names(new_allele) <-allele_palette$AlleleCol[id]
+    # change the text for plot
+    ids <- geno_db_m$ALLELES %fin% names(new_allele)
+    rep <- new_allele[geno_db_m$ALLELES[ids]]
+    rep2 <- code_allele[geno_db_m$ALLELES[ids]]
+    # add new allele code to data
+    geno_db_m[ids, c("ALLELES","text_bottom","text") := list(rep,rep,rep2)]
+    # change annotation in legend colors
+    allele_palette$AlleleCol[id] <- new_allele
+    names(allele_palette$transper)[id] <- new_allele
+    # indicates that novel exists
+    novel <- T
+  }
+
+  geno_db_m$ALLELES <- factor(geno_db_m$ALLELES, levels = allele_palette$AlleleCol)
+  return(geno_db_m)
+}

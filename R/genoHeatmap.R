@@ -221,12 +221,13 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   sub_geno = geno_db_m[geno_db_m$K<lk_cutoff,]
   NR = samples_n
   NC = genes_n*12
+  if(nrow(sub_geno)>0){
   apply(sub_geno, 1,function(x){
 
     I = which(x["SUBJECT"]==samples)-1    # row index
     J = (as.numeric(x["GENE_LOC"])-1)*12            # column index
     draw_segment(NR,NC,I,J,lwd=1,col="white")}
-  )
+  )}
 
   # ad text annotations
   ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)

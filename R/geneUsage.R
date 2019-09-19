@@ -44,7 +44,7 @@ geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style =
   plot_usage_ggplot <- function(sub, title, fam_col){
     sub$GENE <- droplevels(sub$GENE)
     sub$FAM <- factor(sub$FAM)
-    ggplot(sub, aes_string(x = "GENE", y = "FREQ")) + geom_boxplot(outlier.size=NA) +
+    ggplot(sub, aes_string(x = "GENE", y = "FREQ")) + geom_boxplot(outlier.size=NA,outlier.shape=NA) +
       geom_point(aes_string(fill="FAM"), colour='black',position = 'jitter',shape=21,size=1.75,stroke =0.15) +
       scale_fill_manual(name='', values = fam_col, drop=F) +
       ylab('Frequency') + xlab('Gene') + labs(title = title) +

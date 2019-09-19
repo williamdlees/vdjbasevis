@@ -212,8 +212,8 @@ nonReliableAllelesText_V2 <- function(non_reliable_alleles_text, size = 3, map =
                                  ifelse(n == 3, seq(0.165,1,by = 0.33)[1:max(dplyr::row_number())],
                                         seq(0.125,1,by = 0.25)[1:max(dplyr::row_number())]))))
   }
-  non_reliable_alleles_text$NEW_ALLELES <- non_reliable_alleles_text$ALLELES
-  non_reliable_alleles_text$NEW_ALLELES[id] <- "NRA"
+  #non_reliable_alleles_text$NEW_ALLELES <- non_reliable_alleles_text$ALLELES
+  non_reliable_alleles_text$ALLELES[id] <- "NRA"
   return(non_reliable_alleles_text)
 }
 

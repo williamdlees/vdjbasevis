@@ -199,7 +199,8 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
         tmp <- geno2_kval %>% dplyr::group_by(SUBJECT,GENE) %>% dplyr::arrange(desc(ALLELES)) %>% dplyr::mutate(order = 1:dplyr::n())
         unique_text <- bind_rows(non_reliable_alleles_text, novel_allele_text)
         unique_text$ALLELE_TEXT <- as.character(unique_text$ALLELES)
-        unique_text$ALLELE_TEXT[unique_text$ALLELE_TEXT=="NRA"] <- unique_text$text_bottom[unique_text$ALLELE_TEXT=="NRA"]
+        if(length(unique_text$text_bottom[unique_text$ALLELE_TEXT=="NRA"])>0){
+        unique_text$ALLELE_TEXT[unique_text$ALLELE_TEXT=="NRA"] <- unique_text$text_bottom[unique_text$ALLELE_TEXT=="NRA"]}
 
         unique_text <- unique_text %>% left_join(tmp[,c('SUBJECT','GENE','ALLELE_TEXT','order')], by = c('SUBJECT','GENE','ALLELES'='ALLELE_TEXT'))
         unique_text$pos_f <- unique_text$freq * (unique_text$order-1) + unique_text$freq/2

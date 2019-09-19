@@ -243,7 +243,7 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
          allele_len <- length(unique(geno2$ALLELES))
          K_len <- length(unique_k)
          height_pdf = genes_len*0.2+samples_len*0.2
-         width_pdf = ((2*samples_len)+5)
+         width_pdf = ((2*samples_len)+10)
          ratio = allele_len -genes_len
          ratio2 = (allele_len+K_len)/2 - (height_pdf)
          if(ratio>=0 ){height_pdf = height_pdf+(ratio*0.2) }

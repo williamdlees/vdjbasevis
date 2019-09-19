@@ -103,15 +103,15 @@ alleleAPP <- function(gene_list, max_alleles_bar = 8, file = file.path(normalize
       cut_a <- 1
       while(cut_a < length(alleles$Allele)) {
         plot_num <- ceiling(cut_a/max_alleles_bar)
-        plot_name <- paste0(plots_names[gene_id], " [", plot_num, " of ", num_of_plots,"]")
+        plot_name <- paste0(genes[gene_id], " [", plot_num, " of ", num_of_plots,"]")
         long_names <- plot_app(alleles$Allele[cut_a : min(length(alleles$Appeared), (cut_a + max_alleles_bar - 1))],
                                    alleles$Appeared[cut_a : min(length(alleles$Appeared), (cut_a + max_alleles_bar - 1))],
-                                   plot_name, plot_id, max_a, max_p, p_dis, gene_id - (num_of_plots - plot_num), plots_names[gene_id], long_names)
+                                   plot_name, plot_id, max_a, max_p, p_dis, gene_id - (num_of_plots - plot_num), genes[gene_id], long_names)
         plot_id <- plot_id + 1
         cut_a <- cut_a + max_alleles_bar
       }
     } else {
-      long_names <- plot_app(alleles$Allele, alleles$Appeared, plots_names[gene_id], plot_id, max_a, max_p, p_dis, gene_id, plots_names[gene_id], long_names)
+      long_names <- plot_app(alleles$Allele, alleles$Appeared, genes[gene_id], plot_id, max_a, max_p, p_dis, gene_id, genes[gene_id], long_names)
       plot_id <- plot_id + 1
     }
     gene_id <- gene_id + 1

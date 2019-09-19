@@ -195,7 +195,7 @@ nonReliableAllelesText_V2 <- function(non_reliable_alleles_text, size = 3, map =
   num_text <- sapply(1:length(unique(non_reliable_alleles_text$ALLELES[id])),function(i) paste0('[*',i,']'))
   names(num_text) <- unique(non_reliable_alleles_text$ALLELES[id])
   non_reliable_alleles_text$text <- ''
-  non_reliable_alleles_text$text[id] <- num_text[non_reliable_alleles_text$ALLELES[i]]
+  non_reliable_alleles_text$text[id] <- num_text[non_reliable_alleles_text$ALLELES]
   non_reliable_alleles_text$text_bottom <- ''
   non_reliable_alleles_text$text_bottom[id] <- paste(num_text[non_reliable_alleles_text$ALLELES[id]],non_reliable_alleles_text$ALLELES[id])
   non_reliable_alleles_text$pos <- ifelse(non_reliable_alleles_text$freq == 1, 1,

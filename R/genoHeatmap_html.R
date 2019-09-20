@@ -29,7 +29,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   chain <- match.arg(chain)
   lk_cutoff = as.numeric(lk_cutoff)
     # select columns
-  geno_db <- geno_table %>% select(.data$SUBJECT,.data$GENE,.data$GENOTYPED_ALLELES,.data$K_DIFF,.data$Freq_by_Clone)
+  geno_db <- geno_table[,c("SUBJECT", "GENE", "GENOTYPED_ALLELES", "K_DIFF", "Freq_by_Clone")]
   # rename the columns
   names(geno_db)[3:4] <- c("ALLELES", "K")
   # correct deletion annotations
@@ -41,7 +41,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   geno_db$K[grep("Del",geno_db$ALLELES)] <- NA_integer_
   # expand row, one allele per row
   geno_db <- splitstackshape::cSplit(geno_db, "ALLELES", sep = ",", direction = "long", fixed = T, type.convert = F)
-
+  print('ok')
   # add pseudo genes and orf to color base
   color_pes_orf <- c()
   if(pseudo_genes){

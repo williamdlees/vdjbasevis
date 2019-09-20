@@ -274,10 +274,9 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   }
   p1.base <- recordPlot()
   invisible(dev.off())
-  if(is.null(file)) return(list(p = p1.base, width = width, height = height))
-  else{
+  if(!is.null(file)) {
     dev.off()
     # embed the fonts to file
     embedFonts(file)
-  }
+  } else return(list(p = p1.base, width = width, height = height))
 }

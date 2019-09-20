@@ -258,5 +258,5 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
 
   # save html file
-  htmlwidgets::saveWidget(p, file=file, selfcontained = T)
+  htmlwidgets::saveWidget(p, file=file, selfcontained = F)
 }

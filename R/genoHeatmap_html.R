@@ -153,8 +153,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
   print('ok2')
-  conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
-  print('ok3')
+  #conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
+
   vline <- function(x = 0, color = "white") {
     list(
       type = "line",

@@ -41,7 +41,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   geno_db$K[grep("Del",geno_db$ALLELES)] <- NA_integer_
   # expand row, one allele per row
   geno_db <- splitstackshape::cSplit(geno_db, "ALLELES", sep = ",", direction = "long", fixed = T, type.convert = F)
-  print('ok')
+
   # add pseudo genes and orf to color base
   color_pes_orf <- c()
   if(pseudo_genes){
@@ -145,14 +145,16 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # transform allele codes to matrix, 12 box for each gene. each row is an individual
   m <- matrix(geno_db_f[[5]],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
-  print('ok')
+
   allele_code_t <- allele_palette$AlleleCol
   names(allele_code_t) <- allele_code
-  print('ok1')
+
   geno_db_f[,text:=paste("Individual:",SUBJECT,"<br />Gene:",GENE,"<br />Allele:",text_bottom)]
-  print('ok2')
+
   conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
+  print('ok2')
   conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
+  print('ok3')
   vline <- function(x = 0, color = "white") {
     list(
       type = "line",

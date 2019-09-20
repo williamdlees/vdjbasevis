@@ -219,23 +219,6 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   # add grid lines
   gridlines <- lapply(seq(11.5,genes_n*12,by=12),vline)
 
-  # add k lines
-  klines = geno_db_m[geno_db_m$K<lk_cutoff,]
-  if(nrow(klines)>0){
-  klines[, y:=match(SUBJECT,samples)] # row index
-  klines[, yend:=y+0.5] # row index
-  klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
-  klines[, xend:=x+1] # col index
-  klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))}
-
-
-  # add text annotations
-  ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
-  annot = geno_db_m[ids_text,]
-  annot[, y:=(match(SUBJECT,samples)-1)]
-  annot[, x:=((as.numeric(GENE_LOC)-1)*12+as.numeric(id)*(12/n)-1.5 )]
-
-
 
   # plot dim
   plot_height <- 500 + 10*nrow(m)
@@ -248,12 +231,32 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
     plotly::layout(yaxis = list(dtick = 1, ticktext = rownames(m), tickmode="array", tickvals = 0:(nrow(m)-1)),
                    xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)),
                    )
-  if(length(klines2)>0) p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))
-  p <- p %>%  plotly::add_annotations(x = annot$x,
-                                     y = annot$y,
-                                     text = annot$text,
-                                     xref = 'x',
-                                     yref = 'y', size = 0.025, showarrow = FALSE, font=list(color='black',size=0.025))
+
+  # add k lines
+  klines = geno_db_m[geno_db_m$K<lk_cutoff,]
+  if(nrow(klines)>0){
+    klines[, y:=match(SUBJECT,samples)] # row index
+    klines[, yend:=y+0.5] # row index
+    klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
+    klines[, xend:=x+1] # col index
+    klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))
+
+    p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))
+  }
+
+  # add text annotations
+  ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
+  annot = geno_db_m[ids_text,]
+  if(nrow(annot)>0){
+    annot[, y:=(match(SUBJECT,samples)-1)]
+    annot[, x:=((as.numeric(GENE_LOC)-1)*12+as.numeric(id)*(12/n)-1.5 )]
+    p <- p %>%  plotly::add_annotations(x = annot$x,
+                                        y = annot$y,
+                                        text = annot$text,
+                                        xref = 'x',
+                                        yref = 'y', size = 0.025, showarrow = FALSE, font=list(color='black',size=0.025))
+  }
+
 
   # save html file
   htmlwidgets::saveWidget(p, file=file, selfcontained = T)

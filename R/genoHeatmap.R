@@ -192,7 +192,10 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   size_text = nrow(m)/(height*width) # text size for heatmap annoations
   size_text_leg = ncol(m2)/(width*longest_allele)+1 # text size for legend annotations
 
-  if(!is.null(file)) pdf(file,onefile = F, width = width, height = height, family = "serif")
+  if(!is.null(file)){
+    pdf(file,onefile = F, width = width, height = height, family = "serif")
+    print('pdf')
+  }
 
   # plot layout
   layout.matrix <- matrix(c(1, 2, 3), nrow = 3, ncol = 1)
@@ -272,11 +275,13 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
     par(mar=c(1,6,1,6))
     gplots::textplot(annot, halign = "center", cex = size)
   }
-  p1.base <- recordPlot()
-  invisible(dev.off())
   if(!is.null(file)) {
     dev.off()
     # embed the fonts to file
     embedFonts(file)
-  } else return(list(p = p1.base, width = width, height = height))
+  } else{
+    p1.base <- recordPlot()
+    invisible(dev.off())
+    return(list(p = p1.base, width = width, height = height))
+    }
 }

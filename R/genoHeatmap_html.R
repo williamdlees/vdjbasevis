@@ -145,12 +145,12 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # transform allele codes to matrix, 12 box for each gene. each row is an individual
   m <- matrix(geno_db_f[[5]],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
-
+  print('ok')
   allele_code_t <- allele_palette$AlleleCol
   names(allele_code_t) <- allele_code
-
+  print('ok1')
   geno_db_f[,text:=paste("Individual:",SUBJECT,"<br />Gene:",GENE,"<br />Allele:",text_bottom)]
-
+  print('ok2')
   conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
   conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
   vline <- function(x = 0, color = "white") {
@@ -201,7 +201,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   mypal <- colorRampPalette(unique(names(allele_palette$AlleleCol)))
   ncols = length(unique(names(allele_palette$AlleleCol)))+1
   cols <- mypal(ncols)
-
+  print('ok3')
   zseq <- seq(0,1,length.out=ncols+1)
   colorScale <- data.frame(
     z = c(0,rep(zseq[-c(1,length(zseq))],each=2),1),
@@ -246,8 +246,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # add text annotations
   ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
-  annot = geno_db_m[ids_text,]
-  if(nrow(annot)>0){
+  if(length(ids_text)>0){
+    annot = geno_db_m[ids_text,]
     annot[, y:=(match(SUBJECT,samples)-1)]
     annot[, x:=((as.numeric(GENE_LOC)-1)*12+as.numeric(id)*(12/n)-1.5 )]
     p <- p %>%  plotly::add_annotations(x = annot$x,

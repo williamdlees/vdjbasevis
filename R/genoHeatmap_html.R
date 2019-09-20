@@ -11,7 +11,6 @@
 #' @param    removeIGH            if TRUE, 'IGH'\'IGK'\'IGL' prefix is removed from gene names.
 #' @param    lk_cutoff            the lK cutoff value to be considerd low for texture layer. Defualt is lK<1.
 #' @param    mark_low_lk          if TRUE, a texture is add for low lK values. Defualt is TRUE.
-#' @param    html                 if TRUE, an interactive html visualization is produced. Defualt is FALSE.
 #'
 #' @return
 #'
@@ -23,7 +22,7 @@
 #'
 #'
 #' @export
-genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1, mark_low_lk = TRUE, html = FALSE, n_line = 4, line_length=60, pseudo_genes = FALSE, ORF_genes = FALSE, file = file.path(normalizePath(tempdir()),"genotype_heatmap.html")) {
+genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1, mark_low_lk = TRUE, n_line = 4, line_length=60, pseudo_genes = FALSE, ORF_genes = FALSE, file = file.path(normalizePath(tempdir()),"genotype_heatmap.html")) {
   if (missing(chain)) {
     chain = "IGH"
   }
@@ -222,11 +221,12 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # add k lines
   klines = geno_db_m[geno_db_m$K<lk_cutoff,]
+  if(nrow(klines)>0){
   klines[, y:=match(SUBJECT,samples)] # row index
   klines[, yend:=y+0.5] # row index
   klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
   klines[, xend:=x+1] # col index
-  klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))
+  klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))}
 
 
   # add text annotations
@@ -247,8 +247,9 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
                        hoverinfo='text',text=conditions.text, width = plot_width, height = plot_height) %>%
     plotly::layout(yaxis = list(dtick = 1, ticktext = rownames(m), tickmode="array", tickvals = 0:(nrow(m)-1)),
                    xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)),
-                   shapes = c(gridlines,unlist(klines2,recursive = F))) %>%
-    plotly::add_annotations(x = annot$x,
+                   )
+  if(length(klines2)>0) p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))
+  p <- p %>%  plotly::add_annotations(x = annot$x,
                                      y = annot$y,
                                      text = annot$text,
                                      xref = 'x',

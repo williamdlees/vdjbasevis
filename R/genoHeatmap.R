@@ -11,7 +11,6 @@
 #' @param    removeIGH            if TRUE, 'IGH'\'IGK'\'IGL' prefix is removed from gene names.
 #' @param    lk_cutoff            the lK cutoff value to be considerd low for texture layer. Defualt is lK<1.
 #' @param    mark_low_lk          if TRUE, a texture is add for low lK values. Defualt is TRUE.
-#' @param    html                 if TRUE, an interactive html visualization is produced. Defualt is FALSE.
 #' @param    color_y              named list of the colors for y axis labels. Defualt is NULL.
 #' @param    file                 file path for rendering the plot to pdf. If non is supplied than the plot is retured as object. Defualt is NULL.
 #' @return

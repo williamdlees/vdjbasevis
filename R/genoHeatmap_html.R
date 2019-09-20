@@ -152,7 +152,6 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   geno_db_f[,text:=paste("Individual:",SUBJECT,"<br />Gene:",GENE,"<br />Allele:",text_bottom)]
 
   conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
-  print('ok2')
   #conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
 
   vline <- function(x = 0, color = "white") {
@@ -203,7 +202,6 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   mypal <- colorRampPalette(unique(names(allele_palette$AlleleCol)))
   ncols = length(unique(names(allele_palette$AlleleCol)))+1
   cols <- mypal(ncols)
-  print('ok3')
   zseq <- seq(0,1,length.out=ncols+1)
   colorScale <- data.frame(
     z = c(0,rep(zseq[-c(1,length(zseq))],each=2),1),
@@ -231,8 +229,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
                        colorbar = colorbar,
                        hoverinfo='text',text=conditions.text, width = plot_width, height = plot_height) %>%
     plotly::layout(yaxis = list(dtick = 1, ticktext = rownames(m), tickmode="array", tickvals = 0:(nrow(m)-1)),
-                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)),
-                   )
+                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)))
 
   # add k lines
   klines = geno_db_m[geno_db_m$K<lk_cutoff,]

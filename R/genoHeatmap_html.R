@@ -199,8 +199,9 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
     ))
   }
 
+  col_names <- unique(sapply(strsplit(gsub("\\^[0-9]+[-]","",allele_palette$AlleleCol),"_",fixed = T), "[[",1, USE.NAMES = T))
   mypal <- colorRampPalette(unique(names(allele_palette$AlleleCol)))
-  ncols = length(unique(names(allele_palette$AlleleCol)))+1
+  ncols = length(unique(names(allele_palette$AlleleCol)))#+1
   cols <- mypal(ncols)
   zseq <- seq(0,1,length.out=ncols+1)
   colorScale <- data.frame(
@@ -211,8 +212,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   zmx <- round(max(m))
   zmn <- round(min(m))
-  col_names <- unique(sapply(strsplit(gsub("\\^[0-9]+[-]","",allele_palette$AlleleCol),"_",fixed = T), "[[",1, USE.NAMES = T))
-  colorbar=list(tickmode='array', tick0=-zmn, dtick=1,tickvals= 0.5:(ncols+1), ticktext=c("",col_names),
+  colorbar=list(tickmode='array', tick0=-zmn, dtick=1,tickvals= seq(0.5, nrow(m), length.out = (ncols+1)), ticktext=c("",col_names),
                 len = 1, outlinecolor="white",bordercolor="white",borderwidth=5,bgcolor="white")
 
 

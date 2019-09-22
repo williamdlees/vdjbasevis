@@ -187,9 +187,9 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   }
 
   # set the height and width of plot
-  height <- samples_n * 0.1 + 2 + nrow(m2)*0.2 + short_reads_rows*0.4 # number of samples, number of rows in legend, number of rows in bottom annotation
+  height <- samples_n * 0.1 + 5 + nrow(m2)*0.2 + short_reads_rows*0.4 # number of samples, number of rows in legend, number of rows in bottom annotation
   width <- genes_n * 0.3 + 1.5 # numer of genes
-  size_text = nrow(m)/(height*width) # text size for heatmap annoations
+  size_text = nrow(m)/(height*width)+1 # text size for heatmap annoations
   size_text_leg = ncol(m2)/(width*longest_allele)+1 # text size for legend annotations
 
   if(!is.null(file)){
@@ -216,8 +216,9 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
   colors <- "black"
   if(!is.null(color_y)) colors <- color_y[rownames(m)]
 
-  Map(axis, side=2, at=(0:(samples_n-1))/(samples_n-1), col.axis=colors, labels=rownames(m), lwd=0, las=1, cex.axis=0.8) #left
-  axis(2,at=(0:(samples_n-1))/(samples_n-1),labels=FALSE)
+  axis_loc_div <- ifelse(samples_n==1,  samples_n, samples_n-1)
+  Map(axis, side=2, at=(0:(samples_n-1))/(axis_loc_div), col.axis=colors, labels=rownames(m), lwd=0, las=1, cex.axis=0.8) #left
+  axis(2,at=(0:(samples_n-1))/(axis_loc_div),labels=FALSE)
 
   # draw lines for low lk values
   sub_geno = geno_db_m[geno_db_m$K<lk_cutoff,]
@@ -233,6 +234,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
 
   # ad text annotations
   ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
+  if(length(ids_text)>0){
   sub_geno = geno_db_m[ids_text,]
   NR = samples_n
   NC = genes_n*12
@@ -244,7 +246,7 @@ genoHeatmap <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_sort = 
     N_ALLELES = as.numeric(x["n"])                  # number of alleles
     TEXT =  x["text"]                   # text
     Write_text(NR,NC,I,J,ALLELE,N_ALLELES,TEXT,cex=size_text)}
-  )
+  )}
 
   # legend plot
   par(mar=c(0,6,4,6))

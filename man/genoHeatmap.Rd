@@ -24,8 +24,6 @@ if by 'position' only functional genes are used and are ordered by their chromos
 
 \item{mark_low_lk}{if TRUE, a texture is add for low lK values. Defualt is TRUE.}
 
-\item{html}{if TRUE, an interactive html visualization is produced. Defualt is FALSE.}
-
 \item{file}{file path for rendering the plot to pdf. If non is supplied than the plot is retured as object. Defualt is NULL.}
 
 \item{color_y}{named list of the colors for y axis labels. Defualt is NULL.}

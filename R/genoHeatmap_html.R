@@ -169,10 +169,12 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   kline <- function(NR,NC,X,Y, color = "white") {
     STEP_X<-1/(NC-1)
     STEP_Y<-1/(NR-1)
+    y0 = ifelse((Y-1)/NR<0,0,(Y-1)/NR)
+    y1 = Y/NR#(Y+0.5)*STEP_Y #ifelse((Y-0.5)*STEP_Y < 0, 0, (Y-0.5)*STEP_Y)
     list(list(
       type = "line",
-      y0 = (Y-0.5)*STEP_Y,
-      y1 = (Y)*STEP_Y,
+      y0 = y0,
+      y1 = y1,
       yref = "paper",
       x0 = (X+0.5)*STEP_X,
       x1 = (X+3.5)*STEP_X,
@@ -180,8 +182,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
       line = list(color = color)
     ),list(
       type = "line",
-      y0 = (Y-0.5)*STEP_Y,
-      y1 = (Y)*STEP_Y,
+      y0 = y0,
+      y1 = y1,
       yref = "paper",
       x0 = (X+4.5)*STEP_X,
       x1 = (X+7.5)*STEP_X,
@@ -189,8 +191,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
       line = list(color = color)
     ),list(
       type = "line",
-      y0 = (Y-0.5)*STEP_Y,
-      y1 = (Y)*STEP_Y,
+      y0 = y0,
+      y1 = y1,
       yref = "paper",
       x0 = (X+8.5)*STEP_X,
       x1 = (X+11.5)*STEP_X,
@@ -212,8 +214,10 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   zmx <- round(max(m))
   zmn <- round(min(m))
-  colorbar=list(tickmode='array', tick0=-zmn, dtick=1,tickvals= seq(0.5, nrow(m), length.out = (ncols+1)), ticktext=c("",col_names),
-                len = 1, outlinecolor="white",bordercolor="white",borderwidth=5,bgcolor="white")
+  ids_color_scale <- round(sapply(seq(1,nrow(colorScale),2),function(x) mean(colorScale$z[x:(x+1)])),3)*(ncols-1)
+  ids_color_scale <- c(ids_color_scale,ids_color_scale[ncols]+(ids_color_scale[ncols]-ids_color_scale[ncols-1]))
+  colorbar=list(tickmode='array', tick0=-zmn, dtick=1,tickvals = ids_color_scale, ticktext=c("",col_names),
+                len = 0.6, outlinecolor="white",bordercolor="white",borderwidth=5,bgcolor="white")
 
 
   # add grid lines
@@ -234,7 +238,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   # add k lines
   klines = geno_db_m[geno_db_m$K<lk_cutoff,]
   if(nrow(klines)>0){
-    klines[, y:=match(SUBJECT,samples)] # row index
+    klines[, y:=match(SUBJECT,samples)-1] # row index
     klines[, yend:=y+0.5] # row index
     klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
     klines[, xend:=x+1] # col index

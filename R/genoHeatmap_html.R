@@ -238,6 +238,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
     klines[, yend:=y+0.5] # row index
     klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
     klines[, xend:=x+1] # col index
+    NR = samples_n
+    NC = genes_n*12
     klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))
 
     p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))

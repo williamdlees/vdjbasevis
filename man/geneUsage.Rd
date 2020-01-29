@@ -34,5 +34,5 @@ A \code{data.frame} with the following columns.
  # plotting with ggplot
  p <- geneUsage(gene_segment, plot_style = "ggplot")
  # plotting with plotly
- p <- geneUsage(gene_segment, plot_style = "ggplot")
+ p <- geneUsage(gene_segment, plot_style = "plotly")
 }

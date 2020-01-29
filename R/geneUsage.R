@@ -27,7 +27,7 @@
 #'  # plotting with ggplot
 #'  p <- geneUsage(gene_segment, plot_style = "ggplot")
 #'  # plotting with plotly
-#'  p <- geneUsage(gene_segment, plot_style = "ggplot")
+#'  p <- geneUsage(gene_segment, plot_style = "plotly")
 #' @export
 geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style = c("base","ggplot","plotly"), genePlotOrder = c("D",'J','V')){
 
@@ -42,25 +42,27 @@ geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style =
   plot_style <- match.arg(plot_style)
 
   plot_usage_ggplot <- function(sub, title, fam_col){
-    sub$GENE <- droplevels(sub$GENE)
+    if(is.factor(sub$GENE)) sub$GENE <- droplevels(sub$GENE)
     sub$FAM <- factor(sub$FAM)
     ggplot(sub, aes_string(x = "GENE", y = "FREQ")) + geom_boxplot(outlier.size=NA,outlier.shape=NA) +
       geom_point(aes_string(fill="FAM"), colour='black',position = 'jitter',shape=21,size=1.75,stroke =0.15) +
       scale_fill_manual(name='', values = fam_col, drop=F) +
       ylab('Frequency') + xlab('Gene') + labs(title = title) +
       theme(axis.text.y = element_text(size=16), axis.title = element_text(size=16),
-            axis.text.x = element_text(size=14,angle = 90, hjust = 1,vjust=0.5), legend.position = 'none')
+            axis.text.x = element_text(size=14,angle = 90, hjust = 1,vjust=0.5), legend.position = 'none',
+            panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(),
+            axis.line = element_line(colour = "black"))
   }
 
   plot_usage_base <- function(sub, title){
-    sub$GENE <- droplevels(sub$GENE)
+    if(is.factor(sub$GENE)) sub$GENE <- droplevels(sub$GENE)
     boxplot(FREQ ~ GENE, data = sub, lwd = 2, ylab = 'Frequency', xlab = "Gene", outline=FALSE, main = title,las = 2)
     stripchart(FREQ ~ GENE, data = sub, vertical = TRUE,
                method = "jitter", add = TRUE, pch = 20, col = unique(sub, by = c("GENE","FAM_COL"))$FAM_COL)
   }
 
   plot_usage_plotly <- function(sub, title, fam_col){
-    sub$GENE <- droplevels(sub$GENE)
+    if(is.factor(sub$GENE)) sub$GENE <- droplevels(sub$GENE)
     sub %>%
       plotly::plot_ly(colors = c("0"="black",fam_col)) %>%
       plotly::add_trace(x = ~as.numeric(GENE),y = ~FREQ, color = "0", fillcolor="transparent", type = "box", showlegend = FALSE) %>%
@@ -85,6 +87,7 @@ geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style =
   # get the different segments
   nth_seg <- ifelse(chain_gene, 4, 1)
   gene_segment[,"SEGMENT":=substring(gene_segment$GENE, nth_seg, nth_seg)]
+  gene_segment <- gene_segment[order(match(GENE, GENE.loc[chain]))]
   segment_order <- genePlotOrder[genePlotOrder %in% unique(gene_segment$SEGMENT)]
   n_plots <- length(unique(gene_segment$SEGMENT))
   layout_p <- if(n_plots == 3) c(1,3,2,3) else if(n_plots == 2) c(1,2) else 1
@@ -109,9 +112,9 @@ geneUsage <- function(gene_segment, chain = c("IGH", "IGK", "IGL"), plot_style =
                         paste0(chain,x), fam_col)
       })
       top <- plotList[1:ifelse(n_plots>1,n_plots-1,1)]
-      bottom <- ifelse(n_plots>1,plotList[n_plots],NULL)
-      top <- plot_grid(plotlist = top, nrow = 1, align = "hv")
-      if(!is.null(bottom)) p1.base <- plot_grid(top, plotlist = bottom, nrow =  2)
+      bottom <- ifelse(n_plots>1,plotList[n_plots],NA)
+      p1.base <- cowplot::plot_grid(plotlist = top, nrow = 1, align = "hv")
+      if(!is.na(bottom)) p1.base <- cowplot::plot_grid(p1.base, plotlist = bottom, nrow =  2)
     }else{
       plotList <- lapply(unique(gene_segment$SEGMENT), function(x){
         plot_usage_plotly(gene_segment[gene_segment$SEGMENT == x,],

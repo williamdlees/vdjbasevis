@@ -4,11 +4,19 @@
 \alias{genoHeatmap_html}
 \title{Graphical output of alleles division by genotypes}
 \usage{
-genoHeatmap_html(geno_table, chain = c("IGH", "IGK", "IGL"),
-  gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1,
-  mark_low_lk = TRUE, n_line = 4, line_length = 60,
-  pseudo_genes = FALSE, ORF_genes = FALSE,
-  file = file.path(normalizePath(tempdir()), "genotype_heatmap.html"))
+genoHeatmap_html(
+  geno_table,
+  chain = c("IGH", "IGK", "IGL"),
+  gene_sort = "position",
+  removeIGH = TRUE,
+  lk_cutoff = 1,
+  mark_low_lk = TRUE,
+  n_line = 4,
+  line_length = 60,
+  pseudo_genes = FALSE,
+  ORF_genes = FALSE,
+  file = file.path(normalizePath(tempdir()), "genotype_heatmap.html")
+)
 }
 \arguments{
 \item{geno_table}{genoytpe summary table. See details.}

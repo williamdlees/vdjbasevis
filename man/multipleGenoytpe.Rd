@@ -4,9 +4,17 @@
 \alias{multipleGenoytpe}
 \title{Creates genotype graphical output division by subjects in pdf/html format}
 \usage{
-multipleGenoytpe(gen_table, chain = "IGH", html = FALSE,
-  removeIGH = TRUE, text_size = 14, gene_sort = "position",
-  facet_by = "SUBJECT", pseudo_genes = F, ORF_genes = F)
+multipleGenoytpe(
+  gen_table,
+  chain = "IGH",
+  html = FALSE,
+  removeIGH = TRUE,
+  text_size = 14,
+  gene_sort = "position",
+  facet_by = "subject",
+  pseudo_genes = F,
+  ORF_genes = F
+)
 }
 \arguments{
 \item{gen_table}{a table of the genoytpes.}

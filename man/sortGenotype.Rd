@@ -4,8 +4,13 @@
 \alias{sortGenotype}
 \title{Sort multiple genotypes}
 \usage{
-sortGenotype(geno_table, chain = c("IGH", "IGK", "IGL"),
-  gene_sort = "position", removeIGH = TRUE, lk_cutoff = 1)
+sortGenotype(
+  geno_table,
+  chain = c("IGH", "IGK", "IGL"),
+  gene_sort = "position",
+  removeIGH = TRUE,
+  lk_cutoff = 1
+)
 }
 \arguments{
 \item{geno_table}{genoytpe summary table. See details.}

@@ -29,13 +29,13 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   chain <- match.arg(chain)
   lk_cutoff = as.numeric(lk_cutoff)
     # select columns
-  geno_db <- geno_table[,c("SUBJECT", "GENE", "GENOTYPED_ALLELES", "K_DIFF", "Freq_by_Clone")]
+  geno_db <- geno_table[,c("subject", "gene", "GENOTYPED_ALLELES", "k_diff", "Freq_by_Clone")]
   # rename the columns
   names(geno_db)[3:4] <- c("ALLELES", "K")
   # correct deletion annotations
   geno_db$ALLELES <- gsub("Deletion","Del",geno_db$ALLELES)
   # set data.table and correct missing Unk annotations and K
-  geno_db <- setDT(geno_db)[CJ(SUBJECT = SUBJECT, GENE = GENE, unique=TRUE), on=.(SUBJECT, GENE)]
+  geno_db <- setDT(geno_db)[CJ(subject = subject, gene = gene, unique=TRUE), on=.(subject, gene)]
   geno_db[is.na(ALLELES) , c("ALLELES","K") := list("Unk", NA_integer_)]
   # set K value for deleted genes
   geno_db$K[grep("Del",geno_db$ALLELES)] <- NA_integer_
@@ -44,26 +44,32 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # add pseudo genes and orf to color base
   color_pes_orf <- c()
+  GENE.loc.tmp <- GENE.loc[[chain]]
   if(pseudo_genes){
     color_pes_orf <- c(grep("V",PSEUDO[[chain]],value = T),color_pes_orf)
+  }else{
+    GENE.loc.tmp <- c(unique(grep("V",PSEUDO[[chain]],value = T))[! grep("V",PSEUDO[[chain]],value = T) %in% GENE.loc.tmp],GENE.loc.tmp)
   }
   if(ORF_genes){
-    color_pes_orf <- c(unique(grep("OR|NL", geno_db$GENE,value = T)),color_pes_orf)
+    color_pes_orf <- c(unique(grep("OR|NL", geno_db$gene,value = T)),color_pes_orf)
+  }else{
+    GENE.loc.tmp <- c(unique(grep("OR|NL", geno_db$gene,value = T))[! unique(grep("OR|NL", geno_db$gene,value = T)) %in% GENE.loc.tmp],GENE.loc.tmp)
   }
 
   # sort the data, remove pseudo and orf if needed
   geno_db <- sortDFByGene(DATA = geno_db, chain = chain, method = gene_sort, removeIGH = removeIGH, geno = T,
                           peseudo_remove = pseudo_genes, ORF_remove = ORF_genes)
 
-  geno_db$GENE <- factor(geno_db$GENE, levels = gsub("IG[H|K|L]", "", GENE.loc[[chain]]))
+
+  geno_db$gene <- factor(geno_db$gene, levels = gsub("IG[H|K|L]", "", GENE.loc.tmp))
 
   # rename genes to numbers
-  gene_loc <- 1:length(unique(geno_db$GENE)[order(match(unique(geno_db$GENE), levels(geno_db$GENE)))])
-  names(gene_loc) <- unique(geno_db$GENE)[order(match(unique(geno_db$GENE), levels(geno_db$GENE)))]
-  geno_db$GENE_LOC <- gene_loc[as.character(geno_db$GENE)]
+  gene_loc <- 1:length(unique(geno_db$gene)[order(match(unique(geno_db$gene), levels(geno_db$gene)))])
+  names(gene_loc) <- unique(geno_db$gene)[order(match(unique(geno_db$gene), levels(geno_db$gene)))]
+  geno_db$GENE_LOC <- gene_loc[as.character(geno_db$gene)]
 
   ######sort the heatmap for plotting
-  geno_db_m <- geno_db[, n:=  .N, by = list(SUBJECT,GENE)][] # count number of alleles for group
+  geno_db_m <- geno_db[, n:=  .N, by = list(subject,gene)][] # count number of alleles for group
   geno_db_m$ALLELES_G <- geno_db_m$ALLELES # for grouping
   geno_db_m$text <- ''
   geno_db_m$text_bottom <- geno_db_m$ALLELES
@@ -117,15 +123,15 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
 
   # samples names and number
-  samples <- unique(geno_table$SUBJECT)
+  samples <- unique(geno_table$subject)
   samples_n <- length(samples)
   # genes names and number
-  genes <- unique(geno_db_m$GENE)
+  genes <- unique(geno_db_m$gene)
   genes_n <- length(genes)
 
   # order the data by gene loc
-  setorderv(geno_db_m, c("SUBJECT","GENE_LOC"))
-  setkey(geno_db_m, SUBJECT)
+  setorderv(geno_db_m, c("subject","GENE_LOC"))
+  setkey(geno_db_m, subject)
 
   # sort data for matrix
   geno_db_m[,line:=12/n]
@@ -137,11 +143,11 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   # sort the alleles in gene box
   geno_db_m[,A_CODE:=as.numeric(allele_code[ALLELES])]
   geno_db_m[grep("[0-9]_[0-9]",geno_db_m$ALLELES,perl = T),A_CODE:=allele_code["NRA"]]
-  setorderv(geno_db_m, c("SUBJECT","GENE_LOC","A_CODE"))
+  setorderv(geno_db_m, c("subject","GENE_LOC","A_CODE"))
 
   # duplicate the data by 12 box to gene
-  geno_db_m[,id := 1:.N, by = .(SUBJECT, GENE)]
-  geno_db_f = geno_db_m[,.(n_line = 1:line), by = .(SUBJECT, GENE, GENE_LOC, ALLELES_G, A_CODE,text_bottom), nomatch = 0]
+  geno_db_m[,id := 1:.N, by = .(subject, gene)]
+  geno_db_f = geno_db_m[,.(n_line = 1:line), by = .(subject, gene, GENE_LOC, ALLELES_G, A_CODE,text_bottom), nomatch = 0]
 
   # transform allele codes to matrix, 12 box for each gene. each row is an individual
   m <- matrix(geno_db_f[[5]],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
@@ -149,7 +155,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   allele_code_t <- allele_palette$AlleleCol
   names(allele_code_t) <- allele_code
 
-  geno_db_f[,text:=paste("Individual:",SUBJECT,"<br />Gene:",GENE,"<br />Allele:",text_bottom)]
+  geno_db_f[,text:=paste("Individual:",subject,"<br />Gene:",gene,"<br />Allele:",text_bottom)]
 
   conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
   #conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
@@ -216,7 +222,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   zmn <- round(min(m))
   ids_color_scale <- round(sapply(seq(1,nrow(colorScale),2),function(x) mean(colorScale$z[x:(x+1)])),3)*(ncols-1)
   ids_color_scale <- c(ids_color_scale,ids_color_scale[ncols]+(ids_color_scale[ncols]-ids_color_scale[ncols-1]))
-  colorbar=list(tickmode='array', tick0=-zmn, dtick=1,tickvals = ids_color_scale, ticktext=c("",col_names),
+  colorbar=list(tickmode='array', tick0=0, dtick=1,tickvals = 0:length(seq(1,nrow(colorScale),2)), ticktext=c("",col_names),
                 len = 0.6, outlinecolor="white",bordercolor="white",borderwidth=5,bgcolor="white")
 
 
@@ -226,19 +232,19 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # plot dim
   plot_height <- 500 + 10*nrow(m)
-  plot_width <- 100 + 6*ncol(m)
+  plot_width <- 100 + 4*ncol(m)
   # create plot
   p <- plotly::plot_ly(z=(m),type = "heatmap",
                        colorscale= colorScale,
                        colorbar = colorbar,
                        hoverinfo='text',text=conditions.text, width = plot_width, height = plot_height) %>%
     plotly::layout(yaxis = list(dtick = 1, ticktext = rownames(m), tickmode="array", tickvals = 0:(nrow(m)-1)),
-                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)))
+                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12))) %>% plotly::rangeslider()
 
   # add k lines
   klines = geno_db_m[geno_db_m$K<lk_cutoff,]
   if(nrow(klines)>0){
-    klines[, y:=match(SUBJECT,samples)-1] # row index
+    klines[, y:=match(subject,samples)-1] # row index
     klines[, yend:=y+0.5] # row index
     klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
     klines[, xend:=x+1] # col index
@@ -253,7 +259,7 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
   ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
   if(length(ids_text)>0){
     annot = geno_db_m[ids_text,]
-    annot[, y:=(match(SUBJECT,samples)-1)]
+    annot[, y:=(match(subject,samples)-1)]
     annot[, x:=((as.numeric(GENE_LOC)-1)*12+as.numeric(id)*(12/n)-1.5 )]
     p <- p %>%  plotly::add_annotations(x = annot$x,
                                         y = annot$y,
@@ -264,5 +270,11 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
 
   # save html file
-  htmlwidgets::saveWidget(p, file=file, selfcontained = F)
+  save_widget <- function(p, f) {
+    htmlwidgets::saveWidget(p, f, selfcontained = F)
+    mb <- round(file.info(f)$size / 1e6, 3)
+    message("File is: ", mb," MB")
+  }
+
+  save_widget(plotly::partial_bundle(p), f=file)
 }

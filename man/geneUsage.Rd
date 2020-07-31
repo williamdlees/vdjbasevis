@@ -4,9 +4,12 @@
 \alias{geneUsage}
 \title{Graphical output of gene usage in given population}
 \usage{
-geneUsage(gene_segment, chain = c("IGH", "IGK", "IGL"),
-  plot_style = c("base", "ggplot", "plotly"), genePlotOrder = c("D",
-  "J", "V"))
+geneUsage(
+  gene_segment,
+  chain = c("IGH", "IGK", "IGL"),
+  plot_style = c("base", "ggplot", "plotly"),
+  genePlotOrder = c("D", "J", "V")
+)
 }
 \arguments{
 \item{gene_segment}{a data frame of gene usage in a given population. See details.}

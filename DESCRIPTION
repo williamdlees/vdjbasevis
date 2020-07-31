@@ -24,7 +24,7 @@ Imports: dplyr (>= 0.5.0), reshape2,  plotly (>= 4.7.1),
     methods, htmlwidgets, gtable, grDevices, rlang, RColorBrewer, tidyr, stringi, grid, mltools, splitstackshape
 Suggests: knitr,
     rmarkdown
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 NeedsCompilation: no
 Collate: 
     'alleleAPP.R'

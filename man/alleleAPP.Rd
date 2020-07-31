@@ -4,8 +4,11 @@
 \alias{alleleAPP}
 \title{Graphical output of alleles appeareance}
 \usage{
-alleleAPP(gene_list, max_alleles_bar = 8,
-  file = file.path(normalizePath(tempdir()), "allele_appeareance.pdf"))
+alleleAPP(
+  gene_list,
+  max_alleles_bar = 8,
+  file = file.path(normalizePath(tempdir()), "allele_appeareance.pdf")
+)
 }
 \arguments{
 \item{gene_list}{list of alleles appearce for each gene.}

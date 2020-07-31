@@ -4,9 +4,15 @@
 \alias{sortDFByGene}
 \title{Sort data frame by genes}
 \usage{
-sortDFByGene(DATA, chain = c("IGH", "IGK", "IGL"), method = c("name",
-  "position"), removeIGH = FALSE, geno = FALSE, peseudo_remove = F,
-  ORF_remove = F)
+sortDFByGene(
+  DATA,
+  chain = c("IGH", "IGK", "IGL"),
+  method = c("name", "position"),
+  removeIGH = FALSE,
+  geno = FALSE,
+  peseudo_remove = F,
+  ORF_remove = F
+)
 }
 \arguments{
 \item{DATA}{data frame to sort}

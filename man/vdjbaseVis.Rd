@@ -3,7 +3,6 @@
 \docType{package}
 \name{vdjbaseVis}
 \alias{vdjbaseVis}
-\alias{vdjbaseVis-package}
 \title{The vdjbaseVis package}
 \description{
 The \code{vdjbaseVis} package provides multiple visualizations for genotypes.

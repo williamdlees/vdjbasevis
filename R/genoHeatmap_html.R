@@ -147,18 +147,8 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # duplicate the data by 12 box to gene
   geno_db_m[,id := 1:.N, by = .(subject, gene)]
-  geno_db_f = geno_db_m[,.(n_line = 1:line), by = .(subject, gene, GENE_LOC, ALLELES_G, A_CODE,text_bottom), nomatch = 0]
+  geno_db_f = geno_db_m[,.(n_line = 1:line), by = .(subject, gene, GENE_LOC, ALLELES_G, A_CODE,text_bottom,K), nomatch = 0]
 
-  # transform allele codes to matrix, 12 box for each gene. each row is an individual
-  m <- matrix(geno_db_f[[5]],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
-
-  allele_code_t <- allele_palette$AlleleCol
-  names(allele_code_t) <- allele_code
-
-  geno_db_f[,text:=paste("Individual:",subject,"<br />Gene:",gene,"<br />Allele:",text_bottom)]
-
-  conditions.text <- matrix(geno_db_f[[8]], ncol = 12*genes_n, byrow = TRUE)
-  #conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
 
   vline <- function(x = 0, color = "white") {
     list(
@@ -216,13 +206,25 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
     z = c(0,rep(zseq[-c(1,length(zseq))],each=2),1),
     col=rep(cols,each=2)
   )
-  colorScale$col <- as.character(colorScale$col)
+  colorScale$col <- as.character(colorScale$col,sort(as.numeric(unique(geno_db_f[[5]]))))
+  colors_change <- setNames(round(sapply(seq(1,nrow(colorScale),2),function(x) mean(colorScale$z[x:(x+1)])),3),sort(as.numeric(unique(geno_db_f[[5]]))))
+  # transform allele codes to matrix, 12 box for each gene. each row is an individual
+  m <- matrix(colors_change[as.character(geno_db_f[[5]])],ncol = 12*genes_n,byrow = T,dimnames = list(unique(geno_db_f[[1]]),geno_db_f[[2]][1:(12*genes_n)]))
+
+  allele_code_t <- allele_palette$AlleleCol
+  names(allele_code_t) <- allele_code
+
+  geno_db_f[,text:=paste("Individual:",subject,"<br />Gene:",gene,"<br />Allele:",text_bottom,"<br />Kdiff:",round(K,3))]
+
+  conditions.text <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
+  #conditions.cols <- matrix(geno_db_f[[9]], ncol = 12*genes_n, byrow = TRUE)
+
 
   zmx <- round(max(m))
   zmn <- round(min(m))
   ids_color_scale <- round(sapply(seq(1,nrow(colorScale),2),function(x) mean(colorScale$z[x:(x+1)])),3)*(ncols-1)
   ids_color_scale <- c(ids_color_scale,ids_color_scale[ncols]+(ids_color_scale[ncols]-ids_color_scale[ncols-1]))
-  colorbar=list(tickmode='array', tick0=0, dtick=1,tickvals = 0:length(seq(1,nrow(colorScale),2)), ticktext=c("",col_names),
+  colorbar=list(tickmode='array', tick0=0, dtick=1,tickvals = 1:length(seq(1,nrow(colorScale),2)), ticktext=c("",col_names),
                 len = 0.6, outlinecolor="white",bordercolor="white",borderwidth=5,bgcolor="white")
 
 
@@ -232,28 +234,28 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
 
   # plot dim
   plot_height <- 500 + 10*nrow(m)
-  plot_width <- 100 + 4*ncol(m)
+  plot_width <- 100 + 2*ncol(m)
   # create plot
   p <- plotly::plot_ly(z=(m),type = "heatmap",
                        colorscale= colorScale,
-                       colorbar = colorbar,
+                       #colorbar = colorbar,
                        hoverinfo='text',text=conditions.text, width = plot_width, height = plot_height) %>%
     plotly::layout(yaxis = list(dtick = 1, ticktext = rownames(m), tickmode="array", tickvals = 0:(nrow(m)-1)),
-                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12))) %>% plotly::rangeslider()
+                   xaxis = list(dtick = 1, ticktext = unique(colnames(m)), tickmode="array", tickvals = seq(6,12*genes_n,12)))
 
   # add k lines
-  klines = geno_db_m[geno_db_m$K<lk_cutoff,]
-  if(nrow(klines)>0){
-    klines[, y:=match(subject,samples)-1] # row index
-    klines[, yend:=y+0.5] # row index
-    klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
-    klines[, xend:=x+1] # col index
-    NR = samples_n
-    NC = genes_n*12
-    klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))
-
-    p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))
-  }
+  # klines = geno_db_m[geno_db_m$K<lk_cutoff,]
+  # if(nrow(klines)>0){
+  #   klines[, y:=match(subject,samples)-1] # row index
+  #   klines[, yend:=y+0.5] # row index
+  #   klines[, x:=(as.numeric(GENE_LOC)-1)*12] # col index
+  #   klines[, xend:=x+1] # col index
+  #   NR = samples_n
+  #   NC = genes_n*12
+  #   klines2 <- apply(klines, 1,function(x) kline(NR,NC,as.numeric(x["x"]),as.numeric(x["y"])))
+  #
+  #   p <- p %>% plotly::layout(shapes = c(gridlines,unlist(klines2,recursive = F)))
+  # }
 
   # add text annotations
   ids_text <- grep('^[0-9]|Del|Unk',geno_db_m$text_bottom,invert = T)
@@ -276,5 +278,5 @@ genoHeatmap_html <- function(geno_table, chain = c("IGH", "IGK", "IGL"), gene_so
     message("File is: ", mb," MB")
   }
 
-  save_widget(plotly::partial_bundle(p), f=file)
+  save_widget(plotly::partial_bundle(p%>% plotly::rangeslider()), f=file)
 }

@@ -46,12 +46,12 @@ multipleGenoytpe <- function(gen_table, chain = "IGH", html = FALSE, removeIGH =
 
       if(length(chain)!=1){
         genotype <- c()
-      for(ch in chain){
+        for(ch in chain){
           genotype <- rbind(genotype, sortDFByGene(DATA = genotype, chain = ch, method = gene_sort, removeIGH = removeIGH, geno = T,
                               peseudo_remove = pseudo_genes, ORF_remove = ORF_genes))
-      }
+        }
       }else{
-        genotype <- sortDFByGene(DATA = genotype, chain = ch, method = gene_sort, removeIGH = removeIGH, geno = T,
+        genotype <- sortDFByGene(DATA = genotype, chain = chain, method = gene_sort, removeIGH = removeIGH, geno = T,
                                                  peseudo_remove = pseudo_genes, ORF_remove = ORF_genes)
       }
       # # remove pseudo genes + sort genes by loci for genotype graph and k_diff graph
